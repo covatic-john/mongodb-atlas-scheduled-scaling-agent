@@ -4,6 +4,7 @@ import {
 import { InitializeScaleDownCronjob, InitializeScaleUpCronjob, ValidateExpression } from './cron-helpers';
 import { ProductionConsoleLogger } from './logger';
 import { LoggerMessageType } from './interfaces/logger';
+import { ValidateApiKeys } from './api-helpers';
 
 // Atlas Cluster Parameters
 const { ATLAS_API_PRIVATE_KEY, ATLAS_API_PUBLIC_KEY } = process.env;
@@ -28,10 +29,11 @@ const TIMEZONE = 'Pacific/Auckland';
 const scaleUpCronExpression = `${SCALE_UP_MINUTE} ${SCALE_UP_HOUR} * * ${SCALE_UP_DAYS.join(',')}`;
 const scaleDownCronExpression = `${SCALE_DOWN_MINUTE} ${SCALE_DOWN_HOUR} * * ${SCALE_DOWN_DAYS.join(',')}`;
 
+ValidateApiKeys(ATLAS_API_PRIVATE_KEY, ATLAS_API_PUBLIC_KEY);
 ValidateExpression(scaleUpCronExpression, 'scale-up');
 ValidateExpression(scaleDownCronExpression, 'scale-down');
 
-InitializeScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
+const scaleUpTask = InitializeScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,
@@ -40,7 +42,7 @@ InitializeScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
   instanceSize: SCALE_UP_INSTANCE_SIZE,
 });
 
-InitializeScaleDownCronjob(scaleDownCronExpression, TIMEZONE, {
+const scaleDownTask = InitializeScaleDownCronjob(scaleDownCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,
@@ -53,3 +55,17 @@ ProductionConsoleLogger.Write(
   LoggerMessageType.Info,
   'The Cloudize MongoDB Atlas Scheduled Scaling Agent has started and is running',
 );
+
+process.on('SIGTERM', async () => {
+  await ProductionConsoleLogger.Write(
+    LoggerMessageType.Info,
+    'The service has received a SIGTERM. Waiting for the service to achieve a clean state for a safe shutdown.',
+  );
+
+  scaleUpTask.stop();
+  scaleDownTask.stop();
+
+  await ProductionConsoleLogger.Write(LoggerMessageType.Info, 'The process is in a clean state and will shutdown now');
+
+  process.exit(0);
+});

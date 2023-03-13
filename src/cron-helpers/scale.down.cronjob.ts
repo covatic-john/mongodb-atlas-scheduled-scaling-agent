@@ -1,14 +1,14 @@
-import cron from 'node-cron';
-import ModifyClusterConfig from '../api-helpers';
+import cron, {ScheduledTask} from 'node-cron';
 import { MongoDBAtlasClusterScalingOptions } from '../types';
 import { LoggerMessageType } from '../interfaces/logger';
+import { ModifyClusterConfig } from '../api-helpers';
 
 export default function InitializeScaleDownCronjob(
   cronExpression: string,
   timezone: string,
   options: MongoDBAtlasClusterScalingOptions,
-) {
-  cron.schedule(cronExpression, async () => {
+): ScheduledTask {
+  return cron.schedule(cronExpression, async () => {
     await options.logger.Write(
       LoggerMessageType.Info,
       `Scaling down the ${options.clusterName} cluster to ${options.instanceSize}`,

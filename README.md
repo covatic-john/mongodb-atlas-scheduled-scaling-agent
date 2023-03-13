@@ -1,4 +1,4 @@
-# This repo contains the Cloudize MongoDB Atlas Scheduled Scaling Agent
+# This repo contains the MongoDB Atlas Scheduled Scaling Agent
 
 ![](https://img.shields.io/badge/license-MIT-blue)
 
