@@ -1,6 +1,6 @@
 import { isError } from '@cloudize/json';
+import { LoggerMessageType } from '@cloudize/logger';
 import { MongoDBAtlasClusterScalingOptions } from '../types';
-import { LoggerMessageType } from '../interfaces/logger';
 import Cluster from './api.cluster.endpoint.helper';
 
 export default async function ModifyClusterConfig(options: MongoDBAtlasClusterScalingOptions) {

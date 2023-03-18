@@ -1,4 +1,4 @@
-import { ILogger } from '../interfaces/logger';
+import { ILogger } from '@cloudize/logger';
 
 export type CrontabDay = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
 export type CrontabDays = CrontabDay[];

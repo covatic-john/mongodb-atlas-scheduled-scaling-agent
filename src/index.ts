@@ -1,9 +1,8 @@
+import { LoggerMessageType, ProductionConsoleLogger } from '@cloudize/logger';
 import {
   CrontabDays, MongoDBAtlasInstanceSize, MongoDBAtlasProvider,
 } from './types';
 import { InitializeScaleDownCronjob, InitializeScaleUpCronjob, ValidateExpression } from './cron-helpers';
-import { ProductionConsoleLogger } from './logger';
-import { LoggerMessageType } from './interfaces/logger';
 import { ValidateApiKeys } from './api-helpers';
 
 // Atlas Cluster Parameters

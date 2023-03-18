@@ -1,6 +1,6 @@
-import cron, {ScheduledTask} from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
+import { LoggerMessageType } from '@cloudize/logger';
 import { MongoDBAtlasClusterScalingOptions } from '../types';
-import { LoggerMessageType } from '../interfaces/logger';
 import { ModifyClusterConfig } from '../api-helpers';
 
 export default function InitializeScaleDownCronjob(
