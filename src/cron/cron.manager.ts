@@ -9,7 +9,7 @@ export default class CronManager {
     return new ClusterConfigurationAgent();
   }
 
-  static RegisterScaleDownCronjob(
+  static RegisterPauseClusterCronjob(
     cronExpression: string,
     timezone: string,
     options: MongoDBAtlasClusterScalingOptions,
@@ -17,11 +17,51 @@ export default class CronManager {
     return cron.schedule(cronExpression, async () => {
       await options.logger.Write(
         LoggerMessageType.Info,
-        `Scaling down the ${options.clusterName} cluster to ${options.instanceSize}`,
+        `Pausing the ${options.clusterName} cluster.`,
       );
 
       const agent = this.InitializeClusterConfigurationAgent();
-      await agent.ModifyCluster(options);
+      await agent.PauseCluster(options);
+    }, {
+      name: 'Pause',
+      scheduled: true,
+      timezone,
+    });
+  }
+
+  static RegisterResumeClusterCronjob(
+    cronExpression: string,
+    timezone: string,
+    options: MongoDBAtlasClusterScalingOptions,
+  ): ScheduledTask {
+    return cron.schedule(cronExpression, async () => {
+      await options.logger.Write(
+        LoggerMessageType.Info,
+        `Resuming the ${options.clusterName} cluster.`,
+      );
+
+      const agent = this.InitializeClusterConfigurationAgent();
+      await agent.ResumeCluster(options);
+    }, {
+      name: 'Resume',
+      scheduled: true,
+      timezone,
+    });
+  }
+
+  static RegisterScaleDownClusterCronjob(
+    cronExpression: string,
+    timezone: string,
+    options: MongoDBAtlasClusterScalingOptions,
+  ): ScheduledTask {
+    return cron.schedule(cronExpression, async () => {
+      await options.logger.Write(
+        LoggerMessageType.Info,
+        `Scaling down the ${options.clusterName} cluster to ${options.instanceSize}.`,
+      );
+
+      const agent = this.InitializeClusterConfigurationAgent();
+      await agent.ScaleCluster(options);
     }, {
       name: 'Scale down',
       scheduled: true,
@@ -29,7 +69,7 @@ export default class CronManager {
     });
   }
 
-  static RegisterScaleUpCronjob(
+  static RegisterScaleUpClusterCronjob(
     cronExpression: string,
     timezone: string,
     options: MongoDBAtlasClusterScalingOptions,
@@ -37,11 +77,11 @@ export default class CronManager {
     return cron.schedule(cronExpression, async () => {
       await options.logger.Write(
         LoggerMessageType.Info,
-        `Scaling up the ${options.clusterName} cluster to ${options.instanceSize}`,
+        `Scaling up the ${options.clusterName} cluster to ${options.instanceSize}.`,
       );
 
       const agent = this.InitializeClusterConfigurationAgent();
-      await agent.ModifyCluster(options);
+      await agent.ScaleCluster(options);
     }, {
       name: 'Scale up',
       scheduled: true,

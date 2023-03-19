@@ -33,7 +33,7 @@ ValidateApiKeys(ATLAS_API_PRIVATE_KEY, ATLAS_API_PUBLIC_KEY);
 ValidateCronExpression(scaleUpCronExpression, 'scale-up');
 ValidateCronExpression(scaleDownCronExpression, 'scale-down');
 
-const scaleUpTask = CronManager.RegisterScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
+const scaleUpTask = CronManager.RegisterScaleUpClusterCronjob(scaleUpCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,
@@ -42,7 +42,7 @@ const scaleUpTask = CronManager.RegisterScaleUpCronjob(scaleUpCronExpression, TI
   instanceSize: SCALE_UP_INSTANCE_SIZE,
 });
 
-const scaleDownTask = CronManager.RegisterScaleDownCronjob(scaleDownCronExpression, TIMEZONE, {
+const scaleDownTask = CronManager.RegisterScaleDownClusterCronjob(scaleDownCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,

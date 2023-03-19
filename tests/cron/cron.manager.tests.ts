@@ -29,10 +29,10 @@ class TestCronManager extends CronManager {
 afterEach(() => jest.clearAllMocks());
 
 describe('The CronManager', () => {
-  it('should successfully execute a scale up cronjob when the timer ticks over', async () => {
+  it('should successfully execute a pause cluster cronjob when the timer ticks over', async () => {
     jest.useFakeTimers();
 
-    TestCronManager.RegisterScaleUpCronjob(
+    TestCronManager.RegisterPauseClusterCronjob(
       '* * * * *',
       '',
       {
@@ -49,14 +49,62 @@ describe('The CronManager', () => {
     expect(MockLogger.Write).toHaveBeenCalledTimes(1);
     expect(MockLogger.Write).toHaveBeenCalledWith(
       LoggerMessageType.Info,
-      'Scaling up the Test-Cluster cluster to M40',
+      'Pausing the Test-Cluster cluster.',
     );
   });
 
-  it('should successfully execute a scale down cronjob when the timer ticks over', async () => {
+  it('should successfully execute a resume cluster cronjob when the timer ticks over', async () => {
     jest.useFakeTimers();
 
-    TestCronManager.RegisterScaleDownCronjob(
+    TestCronManager.RegisterResumeClusterCronjob(
+      '* * * * *',
+      '',
+      {
+        apikey: { private: 'atlas-private-key', public: 'atlas-public-key' },
+        clusterName: 'Test-Cluster',
+        logger: MockLogger,
+        provider: 'AWS',
+        instanceSize: 'M40',
+        projectId: 'test-project-id',
+      },
+    );
+
+    jest.advanceTimersByTime(60 * 1000);
+    expect(MockLogger.Write).toHaveBeenCalledTimes(1);
+    expect(MockLogger.Write).toHaveBeenCalledWith(
+      LoggerMessageType.Info,
+      'Resuming the Test-Cluster cluster.',
+    );
+  });
+
+  it('should successfully execute a scale up cluster cronjob when the timer ticks over', async () => {
+    jest.useFakeTimers();
+
+    TestCronManager.RegisterScaleUpClusterCronjob(
+      '* * * * *',
+      '',
+      {
+        apikey: { private: 'atlas-private-key', public: 'atlas-public-key' },
+        clusterName: 'Test-Cluster',
+        logger: MockLogger,
+        provider: 'AWS',
+        instanceSize: 'M40',
+        projectId: 'test-project-id',
+      },
+    );
+
+    jest.advanceTimersByTime(60 * 1000);
+    expect(MockLogger.Write).toHaveBeenCalledTimes(1);
+    expect(MockLogger.Write).toHaveBeenCalledWith(
+      LoggerMessageType.Info,
+      'Scaling up the Test-Cluster cluster to M40.',
+    );
+  });
+
+  it('should successfully execute a scale down cluster cronjob when the timer ticks over', async () => {
+    jest.useFakeTimers();
+
+    TestCronManager.RegisterScaleDownClusterCronjob(
       '* * * * *',
       '',
       {
@@ -73,7 +121,7 @@ describe('The CronManager', () => {
     expect(MockLogger.Write).toHaveBeenCalledTimes(1);
     expect(MockLogger.Write).toHaveBeenCalledWith(
       LoggerMessageType.Info,
-      'Scaling down the Test-Cluster cluster to M30',
+      'Scaling down the Test-Cluster cluster to M30.',
     );
   });
 });
