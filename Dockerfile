@@ -12,8 +12,8 @@ COPY . .
 # Install development and production modules
 RUN rm -rf cicd && rm -rf coverage && rm -rf db && rm -rf documentation && rm -rf lib && rm -rf node_modules && npm install typescript@4.9.5 -g && npm install jest@29.4.3 -g && npm install
 
-# Build the app
-RUN tsc
+# Test and build the app
+RUN jest --config jest.config.js && tsc
 
 # cleanup and reinstall production modules
 RUN rm -rf node_modules && npm install --only=production && rm -f .npmrc && rm -rf src && rm -rf tests

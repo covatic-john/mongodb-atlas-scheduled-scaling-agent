@@ -1,9 +1,20 @@
 import urllibClient from 'urllib';
+import { IAtlasClusterEndpoint } from '../interfaces';
+import { MongoDBAtlasClusterUpdateResponse } from '../types';
 
-class Cluster {
+class AtlasClusterEndpoint implements IAtlasClusterEndpoint {
   private readonly baseUrl: string = 'https://cloud.mongodb.com/api/atlas/v1.0';
 
   private readonly digestAuth: string;
+
+  private readonly requestOptions: any = {
+    envelope: true,
+    itemsPerPage: 10,
+    pretty: true,
+    httpOptions: {
+      timeout: 5000,
+    },
+  };
 
   private readonly projectId: string;
 
@@ -12,7 +23,7 @@ class Cluster {
     this.projectId = projectId;
   }
 
-  async update(clustername: string, body: object, options: any = {}) {
+  async Update(clustername: string, body: object): Promise<MongoDBAtlasClusterUpdateResponse> {
     return urllibClient.request(
       `${this.baseUrl}/groups/${this.projectId}/clusters/${clustername}`,
       {
@@ -21,10 +32,10 @@ class Cluster {
         method: 'PATCH',
         data: body,
         headers: { 'Content-Type': 'application/json' },
-        ...options,
+        ...this.requestOptions,
       },
     );
   }
 }
 
-export default Cluster;
+export default AtlasClusterEndpoint;

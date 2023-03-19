@@ -9,14 +9,16 @@
   ],
   "description": "MongoDB Atlas Scheduled Scaling Agent",
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
+    "test:coverage": "jest --coverage --config jest.config.js",
+    "test:watch": "jest --watch --config jest.config.js",
     "run:build": "node lib/src/index.js",
     "run:dev": "ts-node src/index.ts",
-    "win:build": "(if exist lib rmdir /s /q lib) && tsc",
-    "unx:build": "rm -rf lib && tsc"
+    "win:build": "jest --coverage && (if exist lib rmdir /s /q lib) && tsc",
+    "unx:build": "jest --coverage && rm -rf lib && tsc"
   },
   "dependencies": {
     "@cloudize/json": "^23.1.5",
@@ -25,6 +27,7 @@
     "urllib": "^3.11.0"
   },
   "devDependencies": {
+    "@cloudize/mock-logger": "^23.1.5",
     "@types/jest": "29.4.1",
     "@types/node": "18.15.2",
     "@types/node-cron": "^3.0.7",

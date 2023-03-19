@@ -27,3 +27,8 @@ export type MongoDBAtlasClusterScalingOptions = {
     provider: MongoDBAtlasProvider,
     instanceSize: MongoDBAtlasInstanceSize;
 }
+
+export type MongoDBAtlasClusterUpdateResponse = {
+    status: number;
+    [index: string]: any;
+}

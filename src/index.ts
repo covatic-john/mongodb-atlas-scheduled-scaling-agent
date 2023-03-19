@@ -2,8 +2,9 @@ import { LoggerMessageType, ProductionConsoleLogger } from '@cloudize/logger';
 import {
   CrontabDays, MongoDBAtlasInstanceSize, MongoDBAtlasProvider,
 } from './types';
-import { InitializeScaleDownCronjob, InitializeScaleUpCronjob, ValidateExpression } from './cron-helpers';
-import { ValidateApiKeys } from './api-helpers';
+import { CronManager, ValidateCronExpression } from './cron';
+import { ValidateApiKeys } from './atlas-api';
+import { RegisterShutdownHandler } from './shutdown-handler';
 
 // Atlas Cluster Parameters
 const { ATLAS_API_PRIVATE_KEY, ATLAS_API_PUBLIC_KEY } = process.env;
@@ -29,10 +30,10 @@ const scaleUpCronExpression = `${SCALE_UP_MINUTE} ${SCALE_UP_HOUR} * * ${SCALE_U
 const scaleDownCronExpression = `${SCALE_DOWN_MINUTE} ${SCALE_DOWN_HOUR} * * ${SCALE_DOWN_DAYS.join(',')}`;
 
 ValidateApiKeys(ATLAS_API_PRIVATE_KEY, ATLAS_API_PUBLIC_KEY);
-ValidateExpression(scaleUpCronExpression, 'scale-up');
-ValidateExpression(scaleDownCronExpression, 'scale-down');
+ValidateCronExpression(scaleUpCronExpression, 'scale-up');
+ValidateCronExpression(scaleDownCronExpression, 'scale-down');
 
-const scaleUpTask = InitializeScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
+const scaleUpTask = CronManager.RegisterScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,
@@ -41,7 +42,7 @@ const scaleUpTask = InitializeScaleUpCronjob(scaleUpCronExpression, TIMEZONE, {
   instanceSize: SCALE_UP_INSTANCE_SIZE,
 });
 
-const scaleDownTask = InitializeScaleDownCronjob(scaleDownCronExpression, TIMEZONE, {
+const scaleDownTask = CronManager.RegisterScaleDownCronjob(scaleDownCronExpression, TIMEZONE, {
   apikey: { private: ATLAS_API_PRIVATE_KEY, public: ATLAS_API_PUBLIC_KEY },
   logger: ProductionConsoleLogger,
   projectId: ATLAS_PROJECT_ID,
@@ -55,16 +56,7 @@ ProductionConsoleLogger.Write(
   'The Cloudize MongoDB Atlas Scheduled Scaling Agent has started and is running',
 );
 
-process.on('SIGTERM', async () => {
-  await ProductionConsoleLogger.Write(
-    LoggerMessageType.Info,
-    'The service has received a SIGTERM. Waiting for the service to achieve a clean state for a safe shutdown.',
-  );
-
+RegisterShutdownHandler(ProductionConsoleLogger, async () => {
   scaleUpTask.stop();
   scaleDownTask.stop();
-
-  await ProductionConsoleLogger.Write(LoggerMessageType.Info, 'The process is in a clean state and will shutdown now');
-
-  process.exit(0);
 });
